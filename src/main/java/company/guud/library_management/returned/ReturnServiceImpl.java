@@ -1,8 +1,11 @@
 package company.guud.library_management.returned;
 
+import company.guud.library_management.book.Book;
 import company.guud.library_management.book.BookRepository;
+import company.guud.library_management.book.web.BookStatus;
 import company.guud.library_management.borrow.Borrow;
 import company.guud.library_management.borrow.BorrowRepository;
+import company.guud.library_management.borrow.BorrowStatus;
 import company.guud.library_management.customer.Customer;
 import company.guud.library_management.customer.CustomerRepository;
 import company.guud.library_management.returned.web.ReturnCreationDto;
@@ -25,9 +28,11 @@ public class ReturnServiceImpl implements ReturnService{
     private final CustomerRepository customerRepository;
 
     @Override
-    public ReturnDtoDetail create(ReturnCreationDto returnCreationDto,Long borrowId,Long customerId) {
-/*        Borrow borrow = borrowRepository.findById(borrowId)
+    public ReturnDtoDetail create(ReturnCreationDto returnCreationDto) {
+        Borrow borrow = borrowRepository.findById(returnCreationDto.borrowId())
                 .orElseThrow(() -> new RuntimeException("Borrow not found"));
+        Customer customer = customerRepository.findById(returnCreationDto.customerId())
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Return returned = returnMapper.toCreateEntity(returnCreationDto);
         if (returned.getAmount() < borrow.getAmount()) {
@@ -36,32 +41,20 @@ public class ReturnServiceImpl implements ReturnService{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Return amount is greater than borrow amount");
         } else {
             borrow.setBorrowStatus(BorrowStatus.RETURN);
-            borrow.setAmount(borrow.getAmount() - returned.getAmount());
-            borrowRepository.save(borrow);
-            Book book = new Book();
-            book.setAmount(returned.getAmount()+borrow.getAmount());
-            book.setBookStatus(BookStatus.AVAILABLE);
-            bookRepository.save(book);
-            returned.setBorrow(borrow);
-            returned.setCustomer(customerRepository.findById(customerId)
-                    .orElseThrow(() -> new RuntimeException("Customer not found")));
-
 
         }
-        return returnMapper.toDtoDetail(returnRepository.save(returned));*/
-        try {
-            Borrow borrow = borrowRepository.findById(borrowId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Borrow not found"));
-            Customer customer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
-            Return returned = returnMapper.toCreateEntity(returnCreationDto);
-            returned.setCreatedDate(LocalDateTime.now());
-            returned.setBorrow(borrow);
-            returned.setCustomer(customer);
-            return returnMapper.toDtoDetail(returnRepository.save(returned));
-        } catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+
+        borrow.setAmount(borrow.getAmount() - returned.getAmount());
+        borrowRepository.save(borrow);
+        Book book = borrow.getBook();
+        book.setAmount(returned.getAmount()+book.getAmount());
+        book.setBookStatus(BookStatus.AVAILABLE);
+        bookRepository.save(book);
+        returned.setBorrow(borrow);
+        returned.setCustomer(customer);
+        returned.setCreatedDate(LocalDateTime.now());
+        return returnMapper.toDtoDetail(returnRepository.save(returned));
+
     }
 
     @Override

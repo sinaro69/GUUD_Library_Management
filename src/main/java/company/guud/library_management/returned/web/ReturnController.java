@@ -13,11 +13,10 @@ public class ReturnController {
 
     private final ReturnService returnService;
 
-    @PostMapping("/borrow/{borrowId}/customer/{customerId}")
-    public BaseApi<?> create(@RequestBody ReturnCreationDto returnCreationDto,
-                             @PathVariable Long borrowId,
-                             @PathVariable Long customerId){
-        var returned = this.returnService.create(returnCreationDto,borrowId,customerId);
+    @PostMapping
+    public BaseApi<?> create(@RequestBody ReturnCreationDto returnCreationDto
+                             ){
+        var returned = this.returnService.create(returnCreationDto);
         return BaseApi.builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Created successfully")
