@@ -18,7 +18,7 @@ public class BorrowController {
 
     private final BorrowService borrowService;
 
-    @PostMapping
+/*    @PostMapping
     public BaseApi<?> createBorrow(@RequestBody CreateBorrowDto createBorrowDto){
         BorrowDto borrowDto = borrowService.createBorrow(createBorrowDto);
         return BaseApi.builder()
@@ -28,7 +28,7 @@ public class BorrowController {
                 .timestamp(LocalDateTime.now())
                 .status(true)
                 .build();
-    }
+    }*/
 
     @GetMapping("/{id}")
     public BaseApi<?> findById(@PathVariable Long id){
@@ -72,6 +72,17 @@ public class BorrowController {
                 .code(HttpStatus.OK.value())
                 .message("Borrow created successfully")
                 .data(borrow)
+                .timestamp(LocalDateTime.now())
+                .status(true)
+                .build();
+    }
+    @GetMapping("/create")
+    public BaseApi<?> createNew(@RequestBody CreateBorrowDto createBorrowDto){
+        BorrowDto borrowDto = borrowService.create(createBorrowDto);
+        return BaseApi.builder()
+                .code(HttpStatus.OK.value())
+                .message("Borrow created successfully")
+                .data(borrowDto)
                 .timestamp(LocalDateTime.now())
                 .status(true)
                 .build();

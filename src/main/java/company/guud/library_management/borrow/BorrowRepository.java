@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BorrowRepository extends JpaRepository<Borrow, Long> {
+    boolean findBorrowByCustomer_Id(Long customerId);
 }

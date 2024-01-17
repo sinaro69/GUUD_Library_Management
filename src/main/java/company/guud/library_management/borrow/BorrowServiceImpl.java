@@ -103,4 +103,26 @@ public class BorrowServiceImpl implements BorrowService{
         borrowRepository.delete(borrow);
         return borrow;
     }
+    @Override
+    public BorrowDto create(CreateBorrowDto createBorrowDto) {
+        Book book = bookRepository.findById(createBorrowDto.bookId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+        Customer customer = customerRepository.findById(createBorrowDto.customerId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+        Borrow borrow = borrowMapStruct.createBorrow(createBorrowDto);
+        if (borrow.getAmount() <= book.getAmount()) {
+
+            book.setAmount(book.getAmount() - borrow.getAmount());
+            bookRepository.save(book);
+            borrow.setBook(book);
+            borrow.setCustomer(customer);
+            borrow.setCreateDate(LocalDate.now());
+            return borrowMapStruct.toDto(borrowRepository.save(borrow));
+        }else if (borrow.getAmount()<=0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Borrow amount must be greater than 0");
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Borrow amount is greater than book amount");
+        }
+    }
 }
