@@ -18,4 +18,5 @@ public interface BorrowService {
     BorrowDto updateById(Long id, UpdateBorrowDto updateBorrowDto);
 
     Borrow deleteById(Long id);
+    BorrowDto create(CreateBorrowDto createBorrowDto);
 }

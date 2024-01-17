@@ -24,8 +24,8 @@ public class BookServiceImpl implements BookService{
         if (bookRepository.existsBookByTitleAndAuthorAndYear(bookCreationDto.title(), bookCreationDto.author(), bookCreationDto.year())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Book already exists with the same title, author and year please check again");
         }
-        if (bookCreationDto.amount() < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be greater than 0");
+        if (bookCreationDto.amount() < 1 || bookCreationDto.amount()>20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be greater than 0 and less than 20");
         }
         book.setBookStatus(BookStatus.AVAILABLE);
         return bookMapper.toDto(bookRepository.save(book));
