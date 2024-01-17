@@ -29,11 +29,12 @@ public class Borrow {
     private Long amount;
     private String owe;
     private BorrowStatus borrowStatus;
+
     @ManyToOne
-    @JoinColumn(name = "book_id", referencedColumnName = "id")
+    @JoinColumn(name = "book_id")
     private Book book;
-    
+
     @ManyToOne
-    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 }

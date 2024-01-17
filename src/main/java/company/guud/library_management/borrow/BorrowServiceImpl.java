@@ -9,6 +9,7 @@ import company.guud.library_management.borrow.web.UpdateBorrowDto;
 import company.guud.library_management.customer.Customer;
 import company.guud.library_management.customer.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BorrowServiceImpl implements BorrowService{
 
     private final BorrowMapStruct borrowMapStruct;
@@ -27,56 +29,35 @@ public class BorrowServiceImpl implements BorrowService{
     @Override
     public BorrowDto createBorrow(CreateBorrowDto createBorrowDto) {
         Book book = bookRepository.findById(createBorrowDto.bookId())
-                .orElseThrow(() -> new ResponseStatusException
-                                (HttpStatus.NOT_FOUND, "ID Book not Found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
         Customer customer = customerRepository.findById(createBorrowDto.customerId())
-                .orElseThrow(() ->
-                        new ResponseStatusException
-                                (HttpStatus.NOT_FOUND, "ID Customer not Found"));
-        Borrow borrow = new Borrow();
-        if (book != null && customer != null){
-            if (borrow.getAmount() < book.getAmount()){
-                if (customer.getId() != null){
-                    if (book.getAmount() > 0 && book.getAmount() <= 5){
-                        Book newBook = new Book();
-                        newBook.setAmount(book.getAmount()-borrow.getAmount());
-                        borrow = borrowMapStruct.createBorrow(createBorrowDto);
-                        borrow.setCreateDate(LocalDate.now());
-                        borrow = borrowRepository.save(borrow);
-                        return borrowMapStruct.toDto(borrow);
-                    }else if (book.getAmount() > 5){
-                        throw new ResponseStatusException
-                                (HttpStatus.BAD_REQUEST, "Customer Can not Borrow Book More Then 5");
-                    }else if (book.getAmount() == 0){
-                        book.setBookStatus(BookStatus.NOT_AVAILABLE);
-                    }
-                }else {
-                    if (borrow.getAmount() == 1){
-                        borrow = borrowMapStruct.createBorrow(createBorrowDto);
-                        borrow.setCreateDate(LocalDate.now());
-                        borrow = borrowRepository.save(borrow);
-                        return borrowMapStruct.toDto(borrow);
-                    }else if (book.getAmount() == 0){
-                        book.setBookStatus(BookStatus.NOT_AVAILABLE);
-                    }else {
-                        throw new ResponseStatusException
-                                (HttpStatus.BAD_REQUEST, "New Customer Can Not Borrow More Then One Book");
-                    }
-                }
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found"));
+        Borrow borrow = borrowMapStruct.createBorrow(createBorrowDto);
+        if (borrow.getAmount() <= book.getAmount()) {
 
-            }else {
-                throw new ResponseStatusException
-                        (HttpStatus.BAD_REQUEST, "Borrow More Then Book Don't Allow to Borrow");
-            }
+            book.setAmount(book.getAmount() - borrow.getAmount());
+            bookRepository.save(book);
+            borrow.setBook(book);
+            borrow.setCustomer(customer);
+            borrow.setCreateDate(LocalDate.now());
+            return borrowMapStruct.toDto(borrowRepository.save(borrow));
+        }else if (borrow.getAmount()<=0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Borrow amount must be greater than 0");
         }
-        return null;
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Borrow amount is greater than book amount");
+        }
+
     }
 
     @Override
     public BorrowDto findById(Long id) {
-        Borrow borrow = borrowRepository.findById(id).orElseThrow(()->
-                new ResponseStatusException
-                        (HttpStatus.NOT_FOUND,"Customer Not Found"));
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID must not be null");
+        }
+        Borrow borrow = borrowRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Borrow Record Not Found"));
+
         return borrowMapStruct.toDto(borrow);
     }
 
