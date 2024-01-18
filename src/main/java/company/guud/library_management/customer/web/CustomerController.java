@@ -22,7 +22,7 @@ public class CustomerController {
         CustomerDto customerDto = customerService.createCustomer(createCustomerDto);
         return BaseApi.builder()
                 .code(HttpStatus.OK.value())
-                .message("")
+                .message("Customer Create successfully")
                 .data(customerDto)
                 .timestamp(LocalDateTime.now())
                 .status(true)
@@ -34,7 +34,7 @@ public class CustomerController {
         CustomerDto customerDto = customerService.findById(id);
         return BaseApi.builder()
                 .code(HttpStatus.OK.value())
-                .message("")
+                .message("Customer Find By ID successfully")
                 .data(customerDto)
                 .timestamp(LocalDateTime.now())
                 .status(true)
@@ -46,7 +46,7 @@ public class CustomerController {
         List<CustomerDto> customerDto = customerService.findAll();
         return BaseApi.builder()
                 .code(HttpStatus.OK.value())
-                .message("")
+                .message("Customer Find All successfully")
                 .data(customerDto)
                 .timestamp(LocalDateTime.now())
                 .status(true)
@@ -58,7 +58,7 @@ public class CustomerController {
         CustomerDto customerDto = customerService.updateById(id, updateCustomer);
         return BaseApi.builder()
                 .code(HttpStatus.OK.value())
-                .message("")
+                .message("Customer Update successfully")
                 .data(customerDto)
                 .timestamp(LocalDateTime.now())
                 .status(true)
@@ -70,7 +70,7 @@ public class CustomerController {
         Customer customer = customerService.deleteById(id);
         return BaseApi.builder()
                 .code(HttpStatus.OK.value())
-                .message("")
+                .message("Customer Deleted successfully")
                 .data(customer)
                 .timestamp(LocalDateTime.now())
                 .status(true)

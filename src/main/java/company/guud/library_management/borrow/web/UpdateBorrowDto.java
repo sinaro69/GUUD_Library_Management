@@ -6,13 +6,6 @@ import company.guud.library_management.borrow.BorrowStatus;
 import java.time.LocalDate;
 
 public record UpdateBorrowDto(@JsonFormat(pattern = "dd-MM-yyyy")
-                              LocalDate borrowDate,
-                              @JsonFormat(pattern = "dd-MM-yyyy")
                               LocalDate returnDate,
-                              String recStatus,
-                              @JsonFormat(pattern = "dd-MM-yyyy")
-                              LocalDate createDate,
-                              Long amount,
-                              String owe,
                               BorrowStatus borrowStatus) {
 }

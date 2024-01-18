@@ -8,7 +8,8 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-public record BorrowDto(BookDto book,
+public record BorrowDto(Long id,
+                        BookDto book,
                         CustomerDto customer,
                         LocalDate borrowDate,
                         LocalDate returnDate,

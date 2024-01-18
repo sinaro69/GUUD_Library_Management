@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.Date;
 
 @Builder
-public record CustomerDto(Integer id,
+public record CustomerDto(Long id,
                           String name,
                           String gender,
                           Date dateOfBirth,

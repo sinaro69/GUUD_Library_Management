@@ -15,7 +15,7 @@ public class BookController {
 
     private final BookService bookService;
     @PostMapping
-    public BaseApi<?> createBook(BookCreationDto bookCreationDto) {
+    public BaseApi<?> createBook(@RequestBody BookCreationDto bookCreationDto) {
         BookDto book = bookService.create(bookCreationDto);
         return BaseApi.builder()
                 .code(HttpStatus.CREATED.value())
