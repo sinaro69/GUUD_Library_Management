@@ -10,5 +10,5 @@ public interface ReturnService {
     ReturnDtoDetail update(Long id, ReturnCreationDto returnCreationDto);
     void delete(Long id);
     ReturnDtoDetail getById(Long id);
-    List<ReturnCreationDto> getAll();
+    List<ReturnDtoDetail> getAll();
 }

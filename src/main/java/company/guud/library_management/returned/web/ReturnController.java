@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/returns")
@@ -21,6 +23,8 @@ public class ReturnController {
                 .code(HttpStatus.CREATED.value())
                 .message("Created successfully")
                 .data(returned)
+                .status(true)
+                .timestamp(LocalDateTime.now())
                 .build();
     }
     @GetMapping("/{id}")
@@ -30,6 +34,8 @@ public class ReturnController {
                 .code(HttpStatus.OK.value())
                 .message("Get by id successfully")
                 .data(returned)
+                .status(true)
+                .timestamp(LocalDateTime.now())
                 .build();
     }
     @GetMapping
@@ -39,6 +45,8 @@ public class ReturnController {
                 .code(HttpStatus.OK.value())
                 .message("Get all successfully")
                 .data(returned)
+                .status(true)
+                .timestamp(LocalDateTime.now())
                 .build();
     }
     @PutMapping("/{id}")
@@ -48,6 +56,8 @@ public class ReturnController {
                 .code(HttpStatus.OK.value())
                 .message("Update successfully")
                 .data(returned)
+                .status(true)
+                .timestamp(LocalDateTime.now())
                 .build();
     }
     @DeleteMapping("/{id}")
@@ -56,6 +66,8 @@ public class ReturnController {
         return BaseApi.builder()
                 .code(HttpStatus.OK.value())
                 .message("Delete successfully")
+                .status(true)
+                .timestamp(LocalDateTime.now())
                 .build();
     }
 

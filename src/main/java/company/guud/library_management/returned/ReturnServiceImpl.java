@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,20 +31,26 @@ public class ReturnServiceImpl implements ReturnService{
     @Override
     public ReturnDtoDetail create(ReturnCreationDto returnCreationDto) {
         Borrow borrow = borrowRepository.findById(returnCreationDto.borrowId())
-                .orElseThrow(() -> new RuntimeException("Borrow not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Borrow not found"));
         Customer customer = customerRepository.findById(returnCreationDto.customerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        Return returned = returnMapper.toCreateEntity(returnCreationDto);
-        if (returned.getAmount() < borrow.getAmount()) {
-            borrow.setBorrowStatus(BorrowStatus.OWE);
-        } else if (returned.getAmount() > borrow.getAmount()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Return amount is greater than borrow amount");
-        } else {
-            borrow.setBorrowStatus(BorrowStatus.RETURN);
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Customer not found"));
+        if (!Objects.equals(borrow.getCustomer().getId(), customer.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Customer is not match with borrow");
         }
+        Return returned = returnMapper.toCreateEntity(returnCreationDto);
+        if (returned.getAmount()>0){
 
+            if (returned.getAmount() < borrow.getAmount()) {
+                borrow.setBorrowStatus(BorrowStatus.OWE);
+            } else if (returned.getAmount() > borrow.getAmount()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Return amount is greater than borrow amount");
+            }
+            else {
+                borrow.setBorrowStatus(BorrowStatus.RETURN);
+            }
+        }else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Return amount must be greater than 0");
+        }
         borrow.setAmount(borrow.getAmount() - returned.getAmount());
         borrowRepository.save(borrow);
         Book book = borrow.getBook();
@@ -80,7 +87,7 @@ public class ReturnServiceImpl implements ReturnService{
     }
 
     @Override
-    public List<ReturnCreationDto> getAll(){
+    public List<ReturnDtoDetail> getAll(){
         List<Return> returned = returnRepository.findAll();
         return returnMapper.toDtoList(returned);
 
