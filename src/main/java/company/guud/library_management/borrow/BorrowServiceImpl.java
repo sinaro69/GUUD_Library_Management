@@ -12,6 +12,8 @@ import company.guud.library_management.customer.Customer;
 import company.guud.library_management.customer.CustomerRepository;
 import company.guud.library_management.customer.CustomerService;
 import company.guud.library_management.customer.web.CustomerDto;
+import company.guud.library_management.returned.Return;
+import company.guud.library_management.returned.ReturnRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ public class BorrowServiceImpl implements BorrowService{
 
     private final BorrowMapStruct borrowMapStruct;
     private final BorrowRepository borrowRepository;
+    private final ReturnRepository returnRepository;
     private final BookRepository bookRepository;
     private final CustomerRepository customerRepository;
     @Override
@@ -41,10 +44,13 @@ public class BorrowServiceImpl implements BorrowService{
         Borrow borrow = borrowMapStruct.createBorrow(createBorrowDto);
 
         List<Borrow> borrows = borrowRepository.findBorrowByCustomer_Id(customer.getId());
+        /**
+         * New Customer Borrow
+         */
         if (borrows.isEmpty()){
             if (borrow.getAmount() == 1){
                 book.setAmount(book.getAmount() - borrow.getAmount());
-                bookRepository.save(book);
+                book.setBookStatus(book.getAmount() > 0 ? BookStatus.AVAILABLE:BookStatus.NOT_AVAILABLE);
                 borrow.setBook(book);
                 borrow.setCustomer(customer);
                 borrow.setBorrowDate(LocalDate.now());
@@ -54,28 +60,39 @@ public class BorrowServiceImpl implements BorrowService{
             }
             throw new ResponseStatusException
                     (HttpStatus.BAD_REQUEST, "New Customer can Borrow Only 1 Book");
-        }else {
-            if (borrow.getAmount() <= book.getAmount()) {
-                if (borrow.getAmount() > 0 && borrow.getAmount() <= 5){
-                    book.setAmount(book.getAmount() - borrow.getAmount());
-                    bookRepository.save(book);
-                    borrow.setBook(book);
-                    borrow.setCustomer(customer);
-                    borrow.setBorrowDate(LocalDate.now());
-                    borrow.setBorrowStatus(BorrowStatus.BORROW);
-                    borrow.setCreateDate(LocalDate.now());
-                    return borrowMapStruct.toDto(borrowRepository.save(borrow));
+        }
+        /**
+         * Old Customer Borrow
+         */
+        else {
+            if (book.getAmount()<=0){
+                throw new ResponseStatusException
+                        (HttpStatus.BAD_REQUEST, "Book NOt Available");
+            }else {
+                if (borrow.getAmount() <= book.getAmount()) {
+                    if (borrow.getAmount() > 0 && borrow.getAmount() <= 5){
+                        book.setAmount(book.getAmount() - borrow.getAmount());
+                        book.setBookStatus(book.getAmount() > 0 ? BookStatus.AVAILABLE:BookStatus.NOT_AVAILABLE);
+                        bookRepository.save(book);
+                        borrow.setBook(book);
+                        borrow.setCustomer(customer);
+                        borrow.setBorrowDate(LocalDate.now());
+                        borrow.setBorrowStatus(BorrowStatus.BORROW);
+                        borrow.setCreateDate(LocalDate.now());
+                        return borrowMapStruct.toDto(borrowRepository.save(borrow));
 
-                } else if (borrow.getAmount()<=0){
+                    } else if (borrow.getAmount()<=0){
+                        throw new ResponseStatusException
+                                (HttpStatus.BAD_REQUEST, "Borrow amount must be greater than 0");
+                    }
+                }else if (borrow.getAmount() > book.getAmount()){
                     throw new ResponseStatusException
-                            (HttpStatus.BAD_REQUEST, "Borrow amount must be greater than 0");
+                            (HttpStatus.BAD_REQUEST, "Book less then Borrow");
                 }
             }
-                throw new ResponseStatusException
-                        (HttpStatus.BAD_REQUEST, "Old Customer can Borrow  1 - 5 Book");
+            throw new ResponseStatusException
+                    (HttpStatus.BAD_REQUEST, "Old Customer can Borrow  1 - 5 Book");
         }
-
-
     }
 
     @Override
