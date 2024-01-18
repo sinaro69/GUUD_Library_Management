@@ -56,23 +56,23 @@ public class BorrowServiceImpl implements BorrowService{
                     (HttpStatus.BAD_REQUEST, "New Customer can Borrow Only 1 Book");
         }else {
             if (borrow.getAmount() <= book.getAmount()) {
+                if (borrow.getAmount() > 0 && borrow.getAmount() <= 5){
+                    book.setAmount(book.getAmount() - borrow.getAmount());
+                    bookRepository.save(book);
+                    borrow.setBook(book);
+                    borrow.setCustomer(customer);
+                    borrow.setBorrowDate(LocalDate.now());
+                    borrow.setBorrowStatus(BorrowStatus.BORROW);
+                    borrow.setCreateDate(LocalDate.now());
+                    return borrowMapStruct.toDto(borrowRepository.save(borrow));
 
-                book.setAmount(book.getAmount() - borrow.getAmount());
-                bookRepository.save(book);
-                borrow.setBook(book);
-                borrow.setCustomer(customer);
-                borrow.setBorrowDate(LocalDate.now());
-                borrow.setBorrowStatus(BorrowStatus.BORROW);
-                borrow.setCreateDate(LocalDate.now());
-                return borrowMapStruct.toDto(borrowRepository.save(borrow));
-            }else if (borrow.getAmount()<=0){
-                throw new ResponseStatusException
-                        (HttpStatus.BAD_REQUEST, "Borrow amount must be greater than 0");
+                } else if (borrow.getAmount()<=0){
+                    throw new ResponseStatusException
+                            (HttpStatus.BAD_REQUEST, "Borrow amount must be greater than 0");
+                }
             }
-            else {
                 throw new ResponseStatusException
-                        (HttpStatus.BAD_REQUEST, "Borrow amount is greater than book amount");
-            }
+                        (HttpStatus.BAD_REQUEST, "Old Customer can Borrow  1 - 5 Book");
         }
 
 
