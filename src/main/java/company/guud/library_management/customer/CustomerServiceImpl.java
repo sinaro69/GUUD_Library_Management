@@ -21,7 +21,7 @@ public class CustomerServiceImpl implements CustomerService{
     public CustomerDto createCustomer(CreateCustomerDto createCustomerDto) {
         // Check if identityCardNo already exists
         if (customerRepository.existsByIdentityCardNo(createCustomerDto.identityCardNo())) {
-            throw new DuplicateIdentityCardNoException("Identity Card No already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Identity Card No already exists");
         }
 
         // If identityCardNo is unique, proceed with creating and saving the customer
